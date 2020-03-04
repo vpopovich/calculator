@@ -1,0 +1,12 @@
+.btn-wrapper {
+   height: 2.5em;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   font-weight: lighter;
+   font-size: 1.4em;
+   background-color: #eee;
+   color: #272727;
+   outline: 1px solid #272727;
+   flex: 1;
+}
