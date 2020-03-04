@@ -3,7 +3,7 @@ import './Input.css'
 
  export const Input = props => (
      <div className={'input'}>
-         {props.children}
+         {props.input}
      </div>
  )
 
