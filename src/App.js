@@ -5,6 +5,7 @@ import { Button } from './components/Button';
 import { Input } from './components/Input';
 import { ClearButton } from './components/ClearButton';
 
+import Web3 from 'web3';
 
 class App extends Component {
   constructor(props) {
@@ -18,11 +19,11 @@ class App extends Component {
     this.setState({input: this.state.input + value});
   }
 
-  handleEqual = () => {
-    this.setState({ input: this.calculate(this.state.input) });
+  handleEqual = async () => {
+    this.setState({ input: await this.calculate(this.state.input) });
   }
 
-  calculate = (input) => {
+  calculate = async (input) => {
 
       var f = {
       add: '+',
@@ -56,7 +57,7 @@ class App extends Component {
   
       // Loop while there is still calculation for level of precedence
       while (re.test(input)) {
-        output = _calculate(RegExp.$1, RegExp.$2, RegExp.$3);
+        output = await _calculate(RegExp.$1, RegExp.$2, RegExp.$3);
         if (isNaN(output) || !isFinite(output)) 
           return output; // exit early if not a number
         input = input.replace(re, output);
@@ -65,21 +66,181 @@ class App extends Component {
   
     return output;
   
-    function _calculate(a, op, b) {
+    async function _calculate(a, op, b) {
       a = a * 1;
       b = b * 1;
+
+      const web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
+      web3.eth.defaultAccount = web3.eth.accounts[0];
+    
+      var SimpleABI = [
+        {
+          "inputs": [],
+          "stateMutability": "nonpayable",
+          "type": "constructor"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "int256",
+              "name": "a",
+              "type": "int256"
+            },
+            {
+              "internalType": "int256",
+              "name": "b",
+              "type": "int256"
+            }
+          ],
+          "name": "add",
+          "outputs": [
+            {
+              "internalType": "int256",
+              "name": "",
+              "type": "int256"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "int256",
+              "name": "a",
+              "type": "int256"
+            },
+            {
+              "internalType": "int256",
+              "name": "b",
+              "type": "int256"
+            }
+          ],
+          "name": "div",
+          "outputs": [
+            {
+              "internalType": "int256",
+              "name": "",
+              "type": "int256"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "int256",
+              "name": "a",
+              "type": "int256"
+            },
+            {
+              "internalType": "int256",
+              "name": "b",
+              "type": "int256"
+            }
+          ],
+          "name": "mlt",
+          "outputs": [
+            {
+              "internalType": "int256",
+              "name": "",
+              "type": "int256"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "int256",
+              "name": "a",
+              "type": "int256"
+            },
+            {
+              "internalType": "int256",
+              "name": "b",
+              "type": "int256"
+            }
+          ],
+          "name": "mod",
+          "outputs": [
+            {
+              "internalType": "int256",
+              "name": "",
+              "type": "int256"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "a",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "b",
+              "type": "uint256"
+            }
+          ],
+          "name": "pow",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "int256",
+              "name": "a",
+              "type": "int256"
+            },
+            {
+              "internalType": "int256",
+              "name": "b",
+              "type": "int256"
+            }
+          ],
+          "name": "sub",
+          "outputs": [
+            {
+              "internalType": "int256",
+              "name": "",
+              "type": "int256"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        }
+      ];
+
+      var ContractAdress = "0x9108A236a5B48465b0857854F172E8BEa771CAA5";
+
+      var SimpleContract =new web3.eth.Contract(SimpleABI, ContractAdress);
+      
       switch (op) {
         case f.add:
-          return a + b;
+          return await SimpleContract.methods.add(a, b).call();
           break;
         case f.sub:
-          return a - b;
+          return await SimpleContract.methods.sub(a, b).call();
           break;
         case f.div:
-          return a / b;
+          return await SimpleContract.methods.div(a, b).call();
           break;
         case f.mlt:
-          return a * b;
+          return await SimpleContract.methods.mlt(a, b).call();
           break;
         default:
           return;
